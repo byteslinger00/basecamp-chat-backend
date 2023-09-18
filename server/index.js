@@ -49,7 +49,6 @@ const getKey = (map, val) => {
 
 io.on("connection", (socket) => {
   global.chatSocket = socket;
-
   socket.on("addUser", (userId) => {
     onlineUsers.set(userId, socket.id);
     socket.emit("getUsers", Array.from(onlineUsers));
@@ -61,6 +60,25 @@ io.on("connection", (socket) => {
       socket.to(sendUserSocket).emit("getMessage", {
         senderId,
         message,
+      });
+    }
+  });
+
+  socket.on("typing", ({ senderId, senderEmail, receiverId }) => {
+    const sendUserSocket = onlineUsers.get(receiverId);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit("someonetyping", {
+        senderId,
+        senderEmail
+      });
+    }
+  });
+
+  socket.on("cancle_typing", ({ senderId, receiverId }) => {
+    const sendUserSocket = onlineUsers.get(receiverId);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit("stoptyping", {
+        senderId
       });
     }
   });

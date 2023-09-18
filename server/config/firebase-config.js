@@ -2,15 +2,10 @@
 import admin from 'firebase-admin';
 // const admin = require('firebase-admin')
 import { getAuth } from "firebase-admin/auth";
-console.log('erwerwer')
-const serviceAccount = {
-  projectId: process.env.FIREBASE_PROEJCT_ID, 
-  privateKey: process.env.FIREBASE_PRIVATE_KEY,
-  clientEmail: process.env.FIREBASE_PROEJCT_ID,
-}
+import {serviceAccountKey} from './serviceAccountKey.js'
 
 const app = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(serviceAccountKey),
 });
 
 const auth = getAuth(app);
