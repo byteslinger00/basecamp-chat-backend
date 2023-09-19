@@ -9,6 +9,7 @@ import { VerifyToken, VerifySocketToken } from "./middlewares/VerifyToken.js";
 import chatRoomRoutes from "./routes/chatRoom.js";
 import chatMessageRoutes from "./routes/chatMessage.js";
 import userRoutes from "./routes/user.js";
+import groupChatRoutes from './routes/groupchat.js'
 
 const app = express();
 
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 8080;
 app.use("/api/room", chatRoomRoutes);
 app.use("/api/message", chatMessageRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/group", groupChatRoutes);
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
