@@ -3,6 +3,7 @@ import ChatRoom from "../models/ChatRoom.js";
 export const createChatRoom = async (req, res) => {
   const newChatRoom = new ChatRoom({
     members: [req.body.senderId, req.body.receiverId],
+    name: req.body.name? req.body.name : '',
   });
 
   try {

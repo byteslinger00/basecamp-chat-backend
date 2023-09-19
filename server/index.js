@@ -9,7 +9,8 @@ import { VerifyToken, VerifySocketToken } from "./middlewares/VerifyToken.js";
 import chatRoomRoutes from "./routes/chatRoom.js";
 import chatMessageRoutes from "./routes/chatMessage.js";
 import userRoutes from "./routes/user.js";
-import groupChatRoutes from './routes/groupchat.js'
+import groupChatRoutes from "./routes/groupchat.js";
+import ChatRoom from "./models/ChatRoom.js";
 
 const app = express();
 
@@ -56,33 +57,66 @@ io.on("connection", (socket) => {
     socket.emit("getUsers", Array.from(onlineUsers));
   });
 
-  socket.on("sendMessage", ({ senderId, receiverId, message }) => {
-    const sendUserSocket = onlineUsers.get(receiverId);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("getMessage", {
-        senderId,
-        message,
-      });
-    }
+  socket.on("sendMessage", async ({ senderId, message, id, photo }) => {
+    const chatRooms = await ChatRoom.find();
+    const targetRoom = chatRooms.find((room) => room._id.toString() === id);
+    targetRoom.members.map((member) => {
+      const sendUserSocket = onlineUsers.get(member);
+      if (sendUserSocket) {
+        socket.to(sendUserSocket).emit("getMessage", {
+          senderId,
+          message,
+          photo,
+        });
+      }
+    });
+    // const sendUserSocket = onlineUsers.get(receiverId);
+    // if (sendUserSocket) {
+    //   socket.to(sendUserSocket).emit("getMessage", {
+    //     senderId,
+    //     message,
+    //   });
+    // }
   });
 
-  socket.on("typing", ({ senderId, senderEmail, receiverId }) => {
-    const sendUserSocket = onlineUsers.get(receiverId);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("someonetyping", {
-        senderId,
-        senderEmail
-      });
-    }
+  socket.on("typing", async ({ senderId, senderEmail, receiverId, id }) => {
+    const chatRooms = await ChatRoom.find();
+    const targetRoom = chatRooms.find((room) => room._id.toString() === id);
+    targetRoom.members.map((member) => {
+      const sendUserSocket = onlineUsers.get(member);
+      if (sendUserSocket) {
+        socket.to(sendUserSocket).emit("someonetyping", {
+          senderId,
+          senderEmail,
+        });
+      }
+    });
+    // const sendUserSocket = onlineUsers.get(receiverId);
+    // if (sendUserSocket) {
+    //   socket.to(sendUserSocket).emit("someonetyping", {
+    //     senderId,
+    //     senderEmail,
+    //   });
+    // }
   });
 
-  socket.on("cancle_typing", ({ senderId, receiverId }) => {
-    const sendUserSocket = onlineUsers.get(receiverId);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("stoptyping", {
-        senderId
-      });
-    }
+  socket.on("cancle_typing", async ({ senderId, id }) => {
+    const chatRooms = await ChatRoom.find();
+    const targetRoom = chatRooms.find((room) => room._id.toString() === id);
+    targetRoom.members.map((member) => {
+      const sendUserSocket = onlineUsers.get(member);
+      if (sendUserSocket) {
+        socket.to(sendUserSocket).emit("stoptyping", {
+          senderId,
+        });
+      }
+    });
+    // const sendUserSocket = onlineUsers.get(receiverId);
+    // if (sendUserSocket) {
+    //   socket.to(sendUserSocket).emit("stoptyping", {
+    //     senderId,
+    //   });
+    // }
   });
 
   socket.on("disconnect", () => {
