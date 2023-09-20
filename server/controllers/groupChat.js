@@ -10,3 +10,15 @@ export const getAllChatRoom = async (req, res) => {
     });
   }
 }
+
+export const getChatMembers = async (req, res) => {
+  try {
+    const chatRoom = await ChatRoom.find({});
+    console.log(chatRoom);
+    res.status(200).json(chatRoom);
+  } catch (error) {
+    res.status(404).json({
+      message: error.message,
+    });
+  }
+}
