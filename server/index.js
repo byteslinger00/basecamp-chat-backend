@@ -57,7 +57,7 @@ io.on("connection", (socket) => {
     socket.emit("getUsers", Array.from(onlineUsers));
   });
 
-  socket.on("sendMessage", async ({ senderId, message, id, photo }) => {
+  socket.on("sendMessage", async ({ senderId, senderName, message, id, photo }) => {
     const chatRooms = await ChatRoom.find();
     const targetRoom = chatRooms.find((room) => room._id.toString() === id);
     targetRoom.members.map((member) => {
@@ -68,6 +68,8 @@ io.on("connection", (socket) => {
           message,
           photo,
         });
+        socket.to(sendUserSocket).emit("receive_notification", "New message from " + senderName)
+        console.log('hie')
       }
     });
     // const sendUserSocket = onlineUsers.get(receiverId);
