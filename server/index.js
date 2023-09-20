@@ -69,7 +69,6 @@ io.on("connection", (socket) => {
           photo,
         });
         socket.to(sendUserSocket).emit("receive_notification", "New message from " + senderName)
-        console.log('hie')
       }
     });
     // const sendUserSocket = onlineUsers.get(receiverId);
