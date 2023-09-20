@@ -1,6 +1,4 @@
-// import { initializeApp, cert } from "firebase-admin/app";
 import admin from 'firebase-admin';
-// const admin = require('firebase-admin')
 import { getAuth } from "firebase-admin/auth";
 import {serviceAccountKey} from './serviceAccountKey.js'
 

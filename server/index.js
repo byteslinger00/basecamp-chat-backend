@@ -71,13 +71,6 @@ io.on("connection", (socket) => {
         socket.to(sendUserSocket).emit("receive_notification", "New message from " + senderName)
       }
     });
-    // const sendUserSocket = onlineUsers.get(receiverId);
-    // if (sendUserSocket) {
-    //   socket.to(sendUserSocket).emit("getMessage", {
-    //     senderId,
-    //     message,
-    //   });
-    // }
   });
 
   socket.on("typing", async ({ senderId, senderEmail, receiverId, id }) => {
@@ -92,13 +85,6 @@ io.on("connection", (socket) => {
         });
       }
     });
-    // const sendUserSocket = onlineUsers.get(receiverId);
-    // if (sendUserSocket) {
-    //   socket.to(sendUserSocket).emit("someonetyping", {
-    //     senderId,
-    //     senderEmail,
-    //   });
-    // }
   });
 
   socket.on("cancle_typing", async ({ senderId, id }) => {
@@ -112,12 +98,6 @@ io.on("connection", (socket) => {
         });
       }
     });
-    // const sendUserSocket = onlineUsers.get(receiverId);
-    // if (sendUserSocket) {
-    //   socket.to(sendUserSocket).emit("stoptyping", {
-    //     senderId,
-    //   });
-    // }
   });
 
   socket.on("disconnect", () => {
