@@ -23,6 +23,7 @@ export const getMessages = async (req, res) => {
     const group = await ChatRoom.find({_id: req.params.chatRoomId});
     var userinfo = [];
     await Promise.all(group[0].members.map(async (member)=>{
+      console.log('group:   '+member);
       const userRecord = await auth.getUser(member);
       const { uid, email, displayName, photoURL } = userRecord;
       userinfo.push({id:uid, email, display:displayName, photoURL});

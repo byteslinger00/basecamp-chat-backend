@@ -54,24 +54,30 @@ io.on("connection", (socket) => {
   global.chatSocket = socket;
   socket.on("addUser", (userId) => {
     onlineUsers.set(userId, socket.id);
-    socket.emit("getUsers", Array.from(onlineUsers));
+    socket.broadcast.emit("getUsers", Array.from(onlineUsers));
+    // socket.broadcast.emit('new_useronline',userId)
   });
 
-  socket.on("sendMessage", async ({ senderId, senderName, message, id, photo }) => {
-    const chatRooms = await ChatRoom.find();
-    const targetRoom = chatRooms.find((room) => room._id.toString() === id);
-    targetRoom.members.map((member) => {
-      const sendUserSocket = onlineUsers.get(member);
-      if (sendUserSocket) {
-        socket.to(sendUserSocket).emit("getMessage", {
-          senderId,
-          message,
-          photo,
-        });
-        socket.to(sendUserSocket).emit("receive_notification", "New message from " + senderName)
-      }
-    });
-  });
+  socket.on(
+    "sendMessage",
+    async ({ senderId, senderName, message, id, photo }) => {
+      const chatRooms = await ChatRoom.find();
+      const targetRoom = chatRooms.find((room) => room._id.toString() === id);
+      targetRoom.members.map((member) => {
+        const sendUserSocket = onlineUsers.get(member);
+        if (sendUserSocket) {
+          socket.to(sendUserSocket).emit("getMessage", {
+            senderId,
+            message,
+            photo,
+          });
+          socket
+            .to(sendUserSocket)
+            .emit("receive_notification", "New message from " + senderName);
+        }
+      });
+    }
+  );
 
   socket.on("typing", async ({ senderId, senderEmail, receiverId, id }) => {
     const chatRooms = await ChatRoom.find();
@@ -100,8 +106,25 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("RoomCreated", ({ senderId, receiverId }) => {
+    socket.broadcast.emit("RoomCreatedFrom", {
+      receiverId,
+    });
+  });
+
+  socket.on("chatchanged", async ({ id, name }) => {
+    if (!name) return;
+    console.log("chatchanged:    " + id);
+    const chatRoom = await ChatRoom.find({ name: name });
+    let members = Array.from(chatRoom[0].members);
+    console.log(members.indexOf(id));
+    if (members.indexOf(id) < 0) {
+      await ChatRoom.updateOne({ name: name }, { members: [...members, id] });
+    }
+  });
+
   socket.on("disconnect", () => {
     onlineUsers.delete(getKey(onlineUsers, socket.id));
-    socket.emit("getUsers", Array.from(onlineUsers));
+    socket.broadcast.emit("getUsers", Array.from(onlineUsers));
   });
 });
