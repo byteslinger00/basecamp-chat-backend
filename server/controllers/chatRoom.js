@@ -16,7 +16,6 @@ export const createChatRoom = async (req, res) => {
       });
     }
   } else {
-    console.log('Sender ID:    '+req.body.senderId)
     const newChatRoom = new ChatRoom({
       members: [req.body.senderId],
       name: req.body.groupName ? req.body.groupName : "",

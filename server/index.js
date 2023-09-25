@@ -67,13 +67,18 @@ io.on("connection", (socket) => {
         const sendUserSocket = onlineUsers.get(member);
         if (sendUserSocket) {
           socket.to(sendUserSocket).emit("getMessage", {
+            chatRoomId: id,
             senderId,
             message,
             photo,
           });
           socket
             .to(sendUserSocket)
-            .emit("receive_notification", "New message from " + senderName);
+            .emit("receive_notification", {
+              text: "New message from " + senderName,
+              chatRoomId: id,
+              senderId,
+            });
         }
       });
     }
@@ -86,6 +91,7 @@ io.on("connection", (socket) => {
       const sendUserSocket = onlineUsers.get(member);
       if (sendUserSocket) {
         socket.to(sendUserSocket).emit("someonetyping", {
+          chatRoomId: id,
           senderId,
           senderEmail,
         });
@@ -100,6 +106,7 @@ io.on("connection", (socket) => {
       const sendUserSocket = onlineUsers.get(member);
       if (sendUserSocket) {
         socket.to(sendUserSocket).emit("stoptyping", {
+          chatRoomId: id,
           senderId,
         });
       }
@@ -114,10 +121,8 @@ io.on("connection", (socket) => {
 
   socket.on("chatchanged", async ({ id, name }) => {
     if (!name) return;
-    console.log("chatchanged:    " + id);
     const chatRoom = await ChatRoom.find({ name: name });
     let members = Array.from(chatRoom[0].members);
-    console.log(members.indexOf(id));
     if (members.indexOf(id) < 0) {
       await ChatRoom.updateOne({ name: name }, { members: [...members, id] });
     }
