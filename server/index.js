@@ -120,7 +120,7 @@ io.on("connection", (socket) => {
   socket.on("cancle_typing", async ({ senderId, id }) => {
     const chatRooms = await ChatRoom.find();
     const targetRoom = chatRooms.find((room) => room._id.toString() === id);
-    targetRoom.members.map((member) => {
+    targetRoom?.members.map((member) => {
       const sendUserSocket = onlineUsers.get(member);
       if (sendUserSocket) {
         socket.to(sendUserSocket).emit("stoptyping", {
