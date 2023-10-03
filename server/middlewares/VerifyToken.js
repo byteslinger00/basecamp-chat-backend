@@ -1,7 +1,6 @@
 import auth from "../config/firebase-config.js";
 
 export const VerifyToken = async (req, res, next) => {
-  console.log(req.url)
   if(req.url.indexOf('/api')<0) return next();
   const token = req.headers.authorization.split(" ")[1];
   try {

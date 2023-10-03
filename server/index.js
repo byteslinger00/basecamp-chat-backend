@@ -12,9 +12,9 @@ import userRoutes from "./routes/user.js";
 import groupChatRoutes from "./routes/groupchat.js";
 import ChatRoom from "./models/ChatRoom.js";
 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import path from 'path'
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
 
 const app = express();
 const router = express.Router();
@@ -28,21 +28,18 @@ app.use(VerifyToken);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-console.log('----')
-console.log(__dirname);
 
+app.use(express.static(path.join(__dirname, "build")));
 
-app.use(express.static(path.join(__dirname, 'build')));
-
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+router.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-router.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+router.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.use('/',router)
+app.use("/", router);
 
 const PORT = process.env.PORT || 8080;
 
@@ -95,13 +92,11 @@ io.on("connection", (socket) => {
             message,
             photo,
           });
-          socket
-            .to(sendUserSocket)
-            .emit("receive_notification", {
-              text: "New message from " + senderName,
-              chatRoomId: id,
-              senderId,
-            });
+          socket.to(sendUserSocket).emit("receive_notification", {
+            text: "New message from " + senderName,
+            chatRoomId: id,
+            senderId,
+          });
         }
       });
     }
@@ -148,6 +143,14 @@ io.on("connection", (socket) => {
     let members = Array.from(chatRoom[0].members);
     if (members.indexOf(id) < 0) {
       await ChatRoom.updateOne({ name: name }, { members: [...members, id] });
+      members.map((member) => {
+        const sendUserSocket = onlineUsers.get(member);
+        if (sendUserSocket) {
+          socket.to(sendUserSocket).emit("memberjoined", {
+            chatRoomId: chatRoom[0]._id.toString(),
+          });
+        }
+      });
     }
   });
 
@@ -156,8 +159,3 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("getUsers", Array.from(onlineUsers));
   });
 });
-
-
-
-
-
