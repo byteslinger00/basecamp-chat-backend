@@ -12,8 +12,12 @@ import userRoutes from "./routes/user.js";
 import groupChatRoutes from "./routes/groupchat.js";
 import ChatRoom from "./models/ChatRoom.js";
 
-const app = express();
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import path from 'path'
 
+const app = express();
+const router = express.Router();
 dotenv.config();
 
 app.use(cors());
@@ -21,6 +25,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(VerifyToken);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+console.log('----')
+console.log(__dirname);
+
+
+app.use(express.static(path.join(__dirname, 'build')));
+
+router.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+router.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.use('/',router)
 
 const PORT = process.env.PORT || 8080;
 
@@ -35,8 +57,8 @@ const server = app.listen(PORT, () => {
 
 const io = new Server(server, {
   cors: {
-    // origin: "http://localhost:3000",
-    origin: "https://basecamp-chat.netlify.app",
+    origin: "http://localhost:3000",
+    // origin: "https://basecamp-chat.netlify.app",
     credentials: true,
   },
 });
@@ -134,3 +156,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("getUsers", Array.from(onlineUsers));
   });
 });
+
+
+
+
+
