@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
+import auth from "./config/firebase-config.js";
 
 import "./config/mongo.js";
 
@@ -60,7 +61,7 @@ const io = new Server(server, {
   },
 });
 
-io.use(VerifySocketToken);
+// io.use(VerifySocketToken);
 
 global.onlineUsers = new Map();
 
@@ -74,7 +75,9 @@ io.on("connection", (socket) => {
   global.chatSocket = socket;
   socket.on("addUser", (userId) => {
     onlineUsers.set(userId, socket.id);
-    socket.broadcast.emit("getUsers", Array.from(onlineUsers));
+    console.log(onlineUsers)
+    io.emit("getUsers", Array.from(onlineUsers));
+    socket.emit(socket.id)
     // socket.broadcast.emit('new_useronline',userId)
   });
 
@@ -157,5 +160,33 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     onlineUsers.delete(getKey(onlineUsers, socket.id));
     socket.broadcast.emit("getUsers", Array.from(onlineUsers));
+  });
+
+  socket.on("request", async (data) => {
+    const userRecord = await auth.getUser(getKey(onlineUsers, socket.id));
+    const { uid, email, displayName, photoURL } = userRecord;
+
+    const receiver = onlineUsers.get(data.to);
+    if (receiver) {
+      socket.to(receiver).emit("request", { from: socket.id, username: displayName });
+    }
+  });
+  socket.on("call", (data) => {
+    const receiver = onlineUsers.get(data.to);
+    if (receiver) {
+      socket.to(receiver).emit("call", { ...data, from: socket.id });
+    } else {
+      socket.to(data.to).emit("call", { ...data, from: socket.id });
+      // socket.to(receiver).emit("failed");
+    }
+  });
+  socket.on("end", (data) => {
+    const receiver = onlineUsers.get(data.to);
+    if (receiver) {
+      socket.to(receiver).emit("end");
+    } else {
+      socket.to(data.to).emit("end");
+      // socket.to(receiver).emit("failed");
+    }
   });
 });

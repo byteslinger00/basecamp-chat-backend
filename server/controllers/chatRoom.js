@@ -1,7 +1,6 @@
 import ChatRoom from "../models/ChatRoom.js";
 
 export const createChatRoom = async (req, res) => {
-  console.log('1')
   if (req.body.receiverId !== "Group") {
     const newChatRoom = new ChatRoom({
       members: [req.body.senderId, req.body.receiverId],
@@ -34,7 +33,6 @@ export const createChatRoom = async (req, res) => {
 };
 
 export const getChatRoomOfUser = async (req, res) => {
-  console.log('2')
   try {
     const chatRoom = await ChatRoom.find({});
     res.status(200).json(chatRoom);
@@ -46,7 +44,6 @@ export const getChatRoomOfUser = async (req, res) => {
 };
 
 export const getChatRoomOfUsers = async (req, res) => {
-  console.log('3')
   try {
     const chatRoom = await ChatRoom.find({
       members: { $all: [req.params.firstUserId, req.params.secondUserId] },
