@@ -163,6 +163,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("request", async (data) => {
+    console.log('request');
     const userRecord = await auth.getUser(getKey(onlineUsers, socket.id));
     const { uid, email, displayName, photoURL } = userRecord;
 
@@ -172,6 +173,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("call", (data) => {
+    console.log('calling')
     const receiver = onlineUsers.get(data.to);
     if (receiver) {
       socket.to(receiver).emit("call", { ...data, from: socket.id });
